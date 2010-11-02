@@ -1,0 +1,19 @@
+I2C LCD Daemon for Newhaven I2C Character LCD Modules
+Hugo Vincent, June 2009
+
+This is a trivial interface for Newhaven LCD module connected to a Linux machine
+over an I2C interface. Any standard Linux I2C bus should work (including USB I2C
+adapters that correctly hook into the i2c kernel driver framework).
+
+Opens a named pipe at /dev/lcd which can be written to by other applications.
+Text written to this file will appear on the LCD. 
+Send a bell ('\b')to clear the screen.
+
+Tested with NHD-0420D3Z-FL-GBW (Digikey part number NHD-0420D3Z-FL-GBW-ND).
+http://www.newhavendisplay.com/specs/NHD-0420D3Z-FL-GBW.pdf
+http://www.newhavendisplay.com/index.php?main_page=product_info&cPath=253&products_id=922
+
+Hardware note:
+To enable I2C mode of LCD, Pads of R1 must be jumpered on back of LCD. See
+the manual for the LCD module.
+
