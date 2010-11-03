@@ -50,22 +50,22 @@ static int daemonize = 1, running = 1, have_lcd = 1;
 static jmp_buf my_jmp_buf;
 
 #define LOG_MSG(format, ...) if (daemonize == 1) \
-		syslog(LOG_INFO, format, ##__VA_ARGS__); \
-	else \
-		printf("i2c-lcdd: " format "\n", ##__VA_ARGS__);
+											syslog(LOG_INFO, format, ##__VA_ARGS__); \
+else \
+printf("i2c-lcdd: " format "\n", ##__VA_ARGS__);
 
 void usage(int argc, char **argv)
 {
-    if (argc >=1)
+	if (argc >=1)
 	{
-        printf("Usage: %s -a 0x50 -d /dev/i2c-3 -f /dev/lcd -n -?\n", argv[0]);
-        printf("  Options:\n");
+		printf("Usage: %s -a 0x50 -d /dev/i2c-3 -f /dev/lcd -n -?\n", argv[0]);
+		printf("  Options:\n");
 		printf("     -a\tI2C slave address (in hex) for LCD module\n");
 		printf("     -d\tI2C device\n");
 		printf("     -f\tnamed pipe for input\n");
-        printf("     -n\tDon't daemonize.\n");
-        printf("     -?\tShow this help screen.\n");
-    }
+		printf("     -n\tDon't daemonize.\n");
+		printf("     -?\tShow this help screen.\n");
+	}
 }
 
 void signal_handler(int sig)
@@ -159,19 +159,19 @@ int main(int argc, char **argv)
 	char device[64] = "/dev/i2c-3", fifo_name[64] = "/dev/lcd";
 	int addr = LCD_ADDR, addr_sscanf_ret = 1;
 
-    // Setup signal handling before we start
-    signal(SIGHUP, signal_handler);
+	// Setup signal handling before we start
+	signal(SIGHUP, signal_handler);
 	siginterrupt(SIGHUP, 1);
-    signal(SIGQUIT, signal_handler);
+	signal(SIGQUIT, signal_handler);
 	siginterrupt(SIGQUIT, 1);
 	signal(SIGTERM, signal_handler);
 	siginterrupt(SIGTERM, 1);
 	signal(SIGINT, signal_handler);
 	siginterrupt(SIGINT, 1);
- 
-    int c;
-    while( (c = getopt(argc, argv, "a:d:f:n?")) != -1) {
-        switch(c){
+
+	int c;
+	while( (c = getopt(argc, argv, "a:d:f:n?")) != -1) {
+		switch(c){
 			case 'a':
 				addr_sscanf_ret = sscanf(optarg, "0x%x", &addr);
 				break;
@@ -181,73 +181,73 @@ int main(int argc, char **argv)
 			case 'f':
 				strncpy(fifo_name, optarg, sizeof(fifo_name));
 				break;
-            case 'n':
-                daemonize = 0;
-                break;
-            case '?':
-            default:
-                usage(argc, argv);
-                exit(0);
-                break;
-        }
-    }
+			case 'n':
+				daemonize = 0;
+				break;
+			case '?':
+			default:
+				usage(argc, argv);
+				exit(0);
+				break;
+		}
+	}
 
-    // Setup syslog logging
+	// Setup syslog logging
 	if (daemonize == 1)
 	{
 		setlogmask(LOG_UPTO(LOG_INFO));
 		openlog(DAEMON_NAME, LOG_CONS, LOG_USER);
 	}
-    LOG_MSG("daemon starting up");
+	LOG_MSG("daemon starting up");
 
 	// Check sscanf above worked (delayed until after syslog is initialized)
 	if (addr_sscanf_ret != 1)
 		LOG_MSG("supplied address invalid, using 0x%02x", addr);
- 
-    // Our process ID and Session ID
-    pid_t pid, sid;
- 
-    if (daemonize)
+
+	// Our process ID and Session ID
+	pid_t pid, sid;
+
+	if (daemonize)
 	{
-        // Fork off the parent process
-        pid = fork();
-        if (pid < 0)
+		// Fork off the parent process
+		pid = fork();
+		if (pid < 0)
 		{
 			LOG_MSG("failed to fork daemon process");
-            exit(EXIT_FAILURE);
-        }
+			exit(EXIT_FAILURE);
+		}
 
-        // If we got a good PID, then we can exit the parent process
-        if (pid > 0)
-            exit(EXIT_SUCCESS);
- 
-        // Change the file mode mask
-        umask(0);
- 
-        // Create a new SID for the child process
-        sid = setsid();
-        if (sid < 0)
+		// If we got a good PID, then we can exit the parent process
+		if (pid > 0)
+			exit(EXIT_SUCCESS);
+
+		// Change the file mode mask
+		umask(0);
+
+		// Create a new SID for the child process
+		sid = setsid();
+		if (sid < 0)
 		{
 			LOG_MSG("failed to set daemon process SID");
-            exit(EXIT_FAILURE);
-        }
- 
-        // Change the current working directory
-        if ((chdir("/")) < 0)
+			exit(EXIT_FAILURE);
+		}
+
+		// Change the current working directory
+		if ((chdir("/")) < 0)
 		{
 			LOG_MSG("failed to change daemon working directory");
-            exit(EXIT_FAILURE);
-        }
- 
-        // Close out the standard file descriptors
-        close(STDIN_FILENO);
+			exit(EXIT_FAILURE);
+		}
+
+		// Close out the standard file descriptors
+		close(STDIN_FILENO);
 #ifndef DEBUG
-        close(STDOUT_FILENO);
+		close(STDOUT_FILENO);
 #endif
-        close(STDERR_FILENO);
-    }
- 
- 	//************************************************************************
+		close(STDERR_FILENO);
+	}
+
+	//************************************************************************
 
 	addr >>= 1; // to suit LCD addressing sematics of Newhaven LCD modules
 
@@ -363,15 +363,15 @@ nolcd:
 			// Timeout in poll(), no need to worry (timeout is only enabled as insurance anyway)
 		}
 	}
- 
-    LOG_MSG("daemon exiting cleanly");
+
+	LOG_MSG("daemon exiting cleanly");
 
 	close(fifo_fd);
 	unlink(fifo_name);
 	if (have_lcd)
 		close(i2c_fd);
- 
-    return 0;
+
+	return 0;
 
 	// Cleanup on error
 exit1:
